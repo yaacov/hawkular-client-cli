@@ -133,6 +133,3 @@ def main():
 
             # Update tags in Hawkular
             client.update_metric_tags(MetricType.Gauge, key, key_tags)
-
-if __name__ == "__main__":
-    main()

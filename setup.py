@@ -16,14 +16,13 @@ setup(name='hawkular-client-cli',
     author='Yaacov Zamir',
     author_email='yzamir@redhat.com',
     license='Apache License 2.0',
-    packages=['hawkular-client-cli'],
+    packages=['hawkular_client_cli'],
     install_requires=[
         'future',
-        'yaml',
-        'hawkular-client-python',
+        'hawkular-client',
     ],
     entry_points={
-        'console_scripts': ['hawkular-client-cli=command_line:main'],
+        'console_scripts': ['hawkular-client-cli=hawkular_client_cli.command_line:main'],
     },
     include_package_data=True,
     zip_safe=False)
