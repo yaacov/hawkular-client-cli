@@ -3,11 +3,14 @@ hawkular:
   username: hawkular
   password: aM0tVkm81he_ovm
   tenant: _ops
-tags:
+rules:
   - regex: .*
-    type: node
-    hostname: example.com
-  - regex: memory
-    units: byte
-  - regex: cpu
-    units: cpu
+    tags:
+      type: node
+      hostname: example.com
+  - regex: .*memory
+    tags:
+      units: byte
+  - regex: .*cpu
+    tags:
+      units: cpu
