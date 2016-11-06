@@ -8,9 +8,9 @@ rules:
     tags:
       type: node
       hostname: example.com
-  - regex: .*memory
+  - regex: .*memory.*
     tags:
       units: byte
-  - regex: .*cpu
+  - regex: .*cpu.*
     tags:
       units: cpu
