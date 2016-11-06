@@ -86,6 +86,9 @@ hawkular-client-cli -r machine/example.com/memory.usage
 hawkular-client-cli machine/example.com/memory.usage=300
 ```
 ### Modifying metric definition tags [ -k KEY -a TAG=VALUE ]
+If a key match an auto-tagging rule from a config file, the tag value defined
+in the config file will be updated. Explicit tag values defined using the command line
+argument [ -a or --tags ] will override tag values defined by rules in the config file.
 
 ```bash
 hawkular-client-cli -k machine/example.com/memory.usage -a units=bytes
@@ -93,7 +96,8 @@ hawkular-client-cli -k machine/example.com/memory.usage -a units=bytes
 
 ### Config file
 If present, a yaml config file, can be used to store credentials information, and
-tagging rules.
+tagging rules. Command line arguments will override credentials and tags defined in
+the config file.
 
 Default path for the config file is `/etc/hawkular-client-cli/conifg.yaml`
 
