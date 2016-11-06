@@ -66,7 +66,7 @@ def _get_args():
         print('hawkular-client-cli v' + _VERSION + '\n')
         sys.exit(1)
 
-    return parser.parse_args()
+    return args
 
 # Read config file
 def _get_config(config_file):
