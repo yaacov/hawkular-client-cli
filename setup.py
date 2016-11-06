@@ -1,7 +1,8 @@
 from setuptools import setup
+from hawkular_client_cli.command_line import _VERSION
 
 setup(name='hawkular-client-cli',
-    version='0.3.0',
+    version=_VERSION,
     description='Hawkular client cli',
     long_description='Hawkular client command line tool.',
     classifiers=[

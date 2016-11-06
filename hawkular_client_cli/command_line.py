@@ -19,6 +19,7 @@ from __future__ import (absolute_import, division,
 from builtins import *
 
 import os
+import sys
 import re
 import ssl
 import argparse
@@ -27,12 +28,13 @@ import ssl
 from future.moves.urllib.parse import urlparse
 from hawkular.metrics import HawkularMetricsClient, MetricType
 
+_VERSION = '0.4.0'
+parser = argparse.ArgumentParser(description='Read/Write data to and from a Hawkular metric server.')
+
 # Read cli arguments
 def _get_args():
     """Get and parse command lint arguments
     """
-    
-    parser = argparse.ArgumentParser(description='Read/Write data to and from a Hawkular metric server.')
     parser.add_argument('-n', '--url', dest='url', type=str, nargs='?',
         help='Hawkualr server url')
     parser.add_argument('-i', '--insecure', action='store_true',
@@ -56,6 +58,14 @@ def _get_args():
         help='list all registered keys')
     parser.add_argument('-r', '--read', metavar='KEY', type=str, nargs='+',
         help='read data for keys')
+    parser.add_argument('-v', '--version', action='store_true',
+        help='print version')
+    args = parser.parse_args()
+
+    if args.version:
+        print('hawkular-client-cli v' + _VERSION + '\n')
+        sys.exit(1)
+
     return parser.parse_args()
 
 # Read config file
@@ -80,10 +90,81 @@ def _get_client(args, config):
     password = args.password or config.get('hawkular').get('password') or None
     context = ssl._create_unverified_context() if args.insecure else None
 
-    url_args = urlparse(url)
-    return HawkularMetricsClient(host=url_args.hostname, port=url_args.port, 
-         scheme=url_args.scheme, username=username, password=password, 
-         tenant_id=tenant, context=context)
+    if not url:
+        print('Error: missing url\n')
+        parser.print_help()
+        sys.exit(1)
+    if not tenant:
+        print('Error: missing tenant\n')
+        parser.print_help()
+        sys.exit(1)
+    if not username:
+        print('Error: missing username\n')
+        parser.print_help()
+        sys.exit(1)
+    if not password:
+        print('Error: missing password\n')
+        parser.print_help()
+        sys.exit(1)
+
+    try:
+        url_args = urlparse(url)
+        client = HawkularMetricsClient(host=url_args.hostname, port=url_args.port,
+            scheme=url_args.scheme, username=username, password=password,
+            tenant_id=tenant, context=context)
+    except Exception as err:
+        print(err, '\n')
+        parser.print_help()
+        sys.exit(1)
+
+    return client
+
+def _query_metric_definitions(client, args, config):
+    """ get a list of metric definitions
+    """
+    definitions = client.query_metric_definitions()
+    for definition in definitions:
+        print('id:  ', definition.get('id'))
+        print('tags:', definition.get('tags') or {})
+        print()
+
+def _query_metric(client, args, config):
+    """ get meric data
+    """
+    for key in args.read:
+        print(key)
+        values = client.query_metric(MetricType.Gauge, key, limit=10)
+        for v in values:
+            print (v.get('timestamp'), v.get('value'))
+
+def _push(client, args, config):
+    """ push meric data
+    """
+    for pair in args.values:
+        key, value = pair.split("=")
+        client.push(MetricType.Gauge, key, float(value))
+
+def _update_metric_tags(client, args, config):
+    """ update metric tags
+    """
+    # Get tags from command line args
+    tags = dict([i.split("=")[0], i.split("=")[1]] for i in args.tags)
+    # Get tags rules from the config file
+    rules = config.get('rules') or []
+
+    for key in args.keys:
+        # Clean the tags for this key
+        key_tags = {}
+
+        # Check all tagging rules, and use the rules that apply for this key
+        for rule in rules:
+            compiled_rule = re.compile(rule.get('regex'))
+            if compiled_rule.match(key):
+                key_tags.update(rule.get('tags') or {})
+        key_tags.update(tags)
+
+        # Update tags in Hawkular
+        client.update_metric_tags(MetricType.Gauge, key, **key_tags)
 
 def main():
     # Get client, config and args
@@ -93,46 +174,37 @@ def main():
 
     # Do actions list
     if args.list:
-        definitions = client.query_metric_definitions()
-        for definition in definitions:
-            print('id:  ', definition.get('id'))
-            print('tags:', definition.get('tags') or {})
-            print()
+        try:
+            _query_metric_definitions(client, args, config)
+        except Exception as err:
+            print(err, '\n')
+            sys.exit(1)
 
     # Do actions read keys
     if args.read:
-        for key in args.read:
-            print(key, )
-            values = client.query_metric(MetricType.Gauge, key, limit=10)
-            for v in values:
-                print (v.get('timestamp'), v.get('value'))
+        try:
+            _query_metric(client, args, config)
+        except Exception as err:
+            print(err, '\n')
+            sys.exit(1)
+
 
     # Do actions send key value pairs
     if args.values:
-        for pair in args.values:
-            key, value = pair.split("=")
-            client.push(MetricType.Gauge, key, float(value))
+        try:
+            _push(client, args, config)
+        except Exception as err:
+            print(err, '\n')
+            sys.exit(1)
+
 
     # Do actions update tags
     if args.keys and args.tags:
-        # Get tags from command line args
-        tags = dict([i.split("=")[0], i.split("=")[1]] for i in args.tags)
-        # Get tags rules from the config file
-        rules = config.get('rules') or []
-
-        for key in args.keys:
-            # Clean the tags for this key
-            key_tags = {}
-
-            # Check all tagging rules, and use the rules that apply for this key
-            for rule in rules:
-                compiled_rule = re.compile(rule.get('regex'))
-                if compiled_rule.match(key):
-                    key_tags.update(rule.get('tags') or {})
-            key_tags.update(tags)
-
-            # Update tags in Hawkular
-            client.update_metric_tags(MetricType.Gauge, key, **key_tags)
+        try:
+            _update_metric_tags(client, args, config)
+        except Exception as err:
+            print(err, '\n')
+            sys.exit(1)
 
 if __name__ == "__main__":
     main()
