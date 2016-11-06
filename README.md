@@ -70,22 +70,22 @@ optional arguments:
                         read data for keys
   -v, --version         print version
 ```
-### Querying metric definitions
+### Querying metric definitions [ -l ]
 
 ```bash
 hawkular-client-cli -l
 ```
-### Querying metric data
+### Querying metric data [ -r KEY ]
 
 ```bash
 hawkular-client-cli -r machine/example.com/memory.usage
 ```
-### Pushing new values
+### Pushing new values [ KEY=VALUE ]
 
 ```bash
 hawkular-client-cli machine/example.com/memory.usage=300
 ```
-### Modifying metric definition tags
+### Modifying metric definition tags [ -k KEY -a TAG=VALUE ]
 
 ```bash
 hawkular-client-cli -k machine/example.com/memory.usage -a units=bytes
