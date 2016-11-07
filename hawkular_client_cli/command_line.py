@@ -16,7 +16,6 @@
 """
 from __future__ import (absolute_import, division,
                         print_function, unicode_literals)
-#from builtins import *
 
 import os
 import sys
@@ -28,10 +27,10 @@ from datetime import datetime
 from future.moves.urllib.parse import urlparse
 from hawkular.metrics import HawkularMetricsClient, MetricType
 
-_VERSION = '0.7.4'
+_VERSION = '0.8.1'
 _DESCRIPTION = 'Read/Write data to and from a Hawkular metric server.'
 
-class Cli(object):
+class CommandLine(object):
     def __init__(self):
         self._get_args()
         self._get_config()
@@ -39,12 +38,14 @@ class Cli(object):
         self._get_client()
 
     def log(self, *args):
+        """ Pring logs
+        """
         if self.args.verbose:
             print(*args)
 
     # Read cli arguments
     def _get_args(self):
-        """Get and parse command lint arguments
+        """ Get and parse command lint arguments
         """
         parser = argparse.ArgumentParser(description=_DESCRIPTION)
         parser.add_argument('--url', dest='url', type=str,
@@ -138,7 +139,7 @@ class Cli(object):
         self.client = client
 
     def _query_metric_definitions(self):
-        """ get a list of metric definitions
+        """ Get a list of metric definitions
         """
         tags = dict([i.split("=")[0], i.split("=")[1]] for i in self.args.tags) if self.args.tags else {}
         definitions = self.client.query_metric_definitions(**tags)
@@ -161,7 +162,7 @@ class Cli(object):
             print()
 
     def _query_metric_by_tags(self):
-        """ get meric data
+        """ Get meric data
         """
         tags = dict([i.split("=")[0], i.split("=")[1]] for i in self.args.tags) if self.args.tags else {}
         definitions = self.client.query_metric_definitions(**tags)
@@ -177,7 +178,7 @@ class Cli(object):
             print()
 
     def _push(self):
-        """ push meric data
+        """ Push meric data
         """
         for pair in self.args.values:
             key, value = pair.split("=")
@@ -185,7 +186,7 @@ class Cli(object):
             self.client.push(MetricType.Gauge, key, float(value))
 
     def _update_metric_tags(self):
-        """ update metric tags
+        """ Update metric tags
         """
         # Get tags from command line args
         tags = dict([i.split("=")[0], i.split("=")[1]] for i in self.args.tags) if self.args.tags else {}
@@ -210,7 +211,7 @@ class Cli(object):
                 self.client.update_metric_tags(MetricType.Gauge, key, **key_tags)
 
     def _update_metric_tags_by_keys(self):
-        """ update metric tags
+        """ Update metric tags
         """
         # Get tags from command line args
         tags = dict([i.split("=")[0], i.split("=")[1]] for i in self.args.tags) if self.args.tags else {}
@@ -234,6 +235,8 @@ class Cli(object):
                 self.client.update_metric_tags(MetricType.Gauge, key, **key_tags)
 
     def run(self):
+        """ Run the command line actions
+        """
         # Do actions list
         if self.args.list:
             self.log('List keys by tags:', self.args.tags)
@@ -283,13 +286,12 @@ class Cli(object):
             try:
                 self._update_metric_tags_by_keys()
             except Exception as err:
-                raise
                 print(err, '\n')
                 sys.exit(1)
 
 def main():
-    cli = Cli()
-    cli.run()
+    coammand_line = CommandLine()
+    coammand_line.run()
 
 if __name__ == "__main__":
     main()
