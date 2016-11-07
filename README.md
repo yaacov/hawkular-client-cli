@@ -6,6 +6,7 @@ This repository includes a Python client script to access Hawkular metrics remot
 
 Utility script for accessing Hawkular metrics server remotely, the script can query
 a list of metric definitions and tags, update metrics tags, read and write metric data.
+The script is using the python [hawkular-client](https://github.com/hawkular/hawkular-client-python) module.
 
 ## License and copyright
 
