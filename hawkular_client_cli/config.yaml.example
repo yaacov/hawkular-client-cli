@@ -4,10 +4,6 @@ hawkular:
   password: aM0tVkm81he_ovm
   tenant: _ops
 rules:
-  - regex: .*
-    tags:
-      type: node
-      hostname: example.com
   - regex: .*memory.*
     tags:
       units: byte
