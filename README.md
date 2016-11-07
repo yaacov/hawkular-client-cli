@@ -62,14 +62,21 @@ optional arguments:
   -u [USERNAME], --username [USERNAME]
                         Hawkualr server username
   -a [TAG=VALUE [TAG=VALUE ...]], --tags [TAG=VALUE [TAG=VALUE ...]]
-                        a list of tags
+                        a list of tags [ when used with a list of keys, will
+                        update tags for this keys ]
   -k [KEY [KEY ...]], --keys [KEY [KEY ...]]
-                        a list of keys
+                        a list of keys [ when used with a list of tags, will
+                        update tags for this keys ]
   -l, --list            list all registered keys, can be used with --tags
                         argument for filtering
   -r, --read            read data for keys or tag list [requires the --keys or
                         --tags arguments]
-  -v, --version         print version
+  -v, --version         print versionusage: command_line.py [-h] [-n [URL]] [-i] [-t NAME] [-c [CONFIG_FILE]]
+                       [-p [PASSWORD]] [-u [USERNAME]]
+                       [-a [TAG=VALUE [TAG=VALUE ...]]] [-k [KEY [KEY ...]]]
+                       [-l] [-r] [-v]
+                       [KEY=VALUE [KEY=VALUE ...]]
+
 ```
 ### Querying metric definitions [ -l ]
 Metric definitions list can also be filtered using tags.
