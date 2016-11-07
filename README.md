@@ -40,7 +40,7 @@ hawkular-client-cli -h
 usage: command_line.py [-h] [-n [URL]] [-i] [-t NAME] [-c [CONFIG_FILE]]
                        [-p [PASSWORD]] [-u [USERNAME]]
                        [-a [TAG=VALUE [TAG=VALUE ...]]] [-k [KEY [KEY ...]]]
-                       [-l] [-r KEY [KEY ...]] [-v]
+                       [-l] [-r] [-v]
                        [KEY=VALUE [KEY=VALUE ...]]
 
 Read/Write data to and from a Hawkular metric server.
@@ -62,25 +62,34 @@ optional arguments:
   -u [USERNAME], --username [USERNAME]
                         Hawkualr server username
   -a [TAG=VALUE [TAG=VALUE ...]], --tags [TAG=VALUE [TAG=VALUE ...]]
-                        a list of tags to update
+                        a list of tags
   -k [KEY [KEY ...]], --keys [KEY [KEY ...]]
-                        a list of keys to update
-  -l, --list            list all registered keys
-  -r KEY [KEY ...], --read KEY [KEY ...]
-                        read data for keys
+                        a list of keys
+  -l, --list            list all registered keys, can be used with --tags
+                        argument for filtering
+  -r, --read            read data for keys or tag list [requires the --keys or
+                        --tags arguments]
   -v, --version         print version
 ```
 ### Querying metric definitions [ -l ]
+Metric definitions list can also be filtered using tags.
 
 ```bash
 hawkular-client-cli -l
+hawkular-client-cli -l -a issue=42
 ```
 ### Querying metric data [ -r KEY ]
+Query for metrics data can be done using a list of keys [ using the -k argument ]
+or using a list of tag,value pairs [ using the -a argument ]
 
 ```bash
-hawkular-client-cli -r machine/example.com/memory.usage
+hawkular-client-cli -r -k machine/example.com/memory.usage
+hawkular-client-cli -r -a issue=42
 ```
 ### Pushing new values [ KEY=VALUE ]
+When pushing new data, we also update the tag values of the keys we push data to,
+If not explicit tags are defined ( e.g. using the -a argument ) tags are set using
+rules in the config file.
 
 ```bash
 hawkular-client-cli machine/example.com/memory.usage=300

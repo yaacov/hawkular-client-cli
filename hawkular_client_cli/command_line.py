@@ -51,13 +51,13 @@ def _get_args():
     parser.add_argument('values', metavar='KEY=VALUE', type=str, nargs='*',
         help='key value pairs to send')
     parser.add_argument('-a', '--tags', metavar='TAG=VALUE', dest='tags', type=str, nargs='*',
-        help='a list of tags to update')
+        help='a list of tags')
     parser.add_argument('-k', '--keys', metavar='KEY', dest='keys', type=str, nargs='*',
-        help='a list of keys to update')
+        help='a list of keys')
     parser.add_argument('-l', '--list', action='store_true',
-        help='list all registered keys')
-    parser.add_argument('-r', '--read', metavar='KEY', type=str, nargs='+',
-        help='read data for keys')
+        help='list all registered keys, can be used with --tags argument for filtering')
+    parser.add_argument('-r', '--read', action='store_true',
+        help='read data for keys or tag list [requires the --keys or --tags arguments]')
     parser.add_argument('-v', '--version', action='store_true',
         help='print version')
     args = parser.parse_args()
@@ -122,20 +122,37 @@ def _get_client(args, config):
 def _query_metric_definitions(client, args, config):
     """ get a list of metric definitions
     """
-    definitions = client.query_metric_definitions()
+    tags = dict([i.split("=")[0], i.split("=")[1]] for i in args.tags) if args.tags else {}
+    definitions = client.query_metric_definitions(**tags)
     for definition in definitions:
-        print('id:  ', definition.get('id'))
+        print('key: ', definition.get('id'))
         print('tags:', definition.get('tags') or {})
         print()
 
-def _query_metric(client, args, config):
+def _query_metric_by_keys(client, args, config):
     """ get meric data
     """
-    for key in args.read:
-        print(key)
+    for key in args.keys:
+        print('key:', key)
         values = client.query_metric(MetricType.Gauge, key, limit=10)
+        print('values:')
         for v in values:
-            print (v.get('timestamp'), v.get('value'))
+            print ('    ', v.get('timestamp'), v.get('value'))
+        print()
+
+def _query_metric_by_tags(client, args, config):
+    """ get meric data
+    """
+    tags = dict([i.split("=")[0], i.split("=")[1]] for i in args.tags) if args.tags else {}
+    definitions = client.query_metric_definitions(**tags)
+    for definition in definitions:
+        key = definition.get('id')
+        print('key:', key)
+        values = client.query_metric(MetricType.Gauge, key, limit=3)
+        print('values:')
+        for v in values:
+            print ('    ', v.get('timestamp'), v.get('value'))
+        print()
 
 def _push(client, args, config):
     """ push meric data
@@ -148,7 +165,30 @@ def _update_metric_tags(client, args, config):
     """ update metric tags
     """
     # Get tags from command line args
-    tags = dict([i.split("=")[0], i.split("=")[1]] for i in args.tags)
+    tags = dict([i.split("=")[0], i.split("=")[1]] for i in args.tags) if args.tags else {}
+    # Get tags rules from the config file
+    rules = config.get('rules') or []
+
+    for pair in args.values:
+        key, value = pair.split("=")
+        # Clean the tags for this key
+        key_tags = {}
+
+        # Check all tagging rules, and use the rules that apply for this key
+        for rule in rules:
+            compiled_rule = re.compile(rule.get('regex'))
+            if compiled_rule.match(key):
+                key_tags.update(rule.get('tags') or {})
+        key_tags.update(tags)
+
+        # Update tags in Hawkular
+        client.update_metric_tags(MetricType.Gauge, key, **key_tags)
+
+def _update_metric_tags_by_keys(client, args, config):
+    """ update metric tags
+    """
+    # Get tags from command line args
+    tags = dict([i.split("=")[0], i.split("=")[1]] for i in args.tags) if args.tags else {}
     # Get tags rules from the config file
     rules = config.get('rules') or []
 
@@ -181,13 +221,20 @@ def main():
             sys.exit(1)
 
     # Do actions read keys
-    if args.read:
+    if args.read and args.keys:
         try:
-            _query_metric(client, args, config)
+            _query_metric_by_keys(client, args, config)
         except Exception as err:
             print(err, '\n')
             sys.exit(1)
 
+    # Do actions read keys
+    if args.read and args.tags:
+        try:
+            _query_metric_by_tags(client, args, config)
+        except Exception as err:
+            print(err, '\n')
+            sys.exit(1)
 
     # Do actions send key value pairs
     if args.values:
@@ -197,11 +244,17 @@ def main():
             print(err, '\n')
             sys.exit(1)
 
+        # Update tags for the key=values pairs
+        try:
+            _update_metric_tags(client, args, config)
+        except Exception as err:
+            print(err, '\n')
+            sys.exit(1)
 
     # Do actions update tags
     if args.keys and args.tags:
         try:
-            _update_metric_tags(client, args, config)
+            _update_metric_tags_by_keys(client, args, config)
         except Exception as err:
             print(err, '\n')
             sys.exit(1)
