@@ -28,7 +28,7 @@ import ssl
 from future.moves.urllib.parse import urlparse
 from hawkular.metrics import HawkularMetricsClient, MetricType
 
-_VERSION = '0.4.0'
+_VERSION = '0.5.1'
 parser = argparse.ArgumentParser(description='Read/Write data to and from a Hawkular metric server.')
 
 # Read cli arguments
