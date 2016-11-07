@@ -72,11 +72,7 @@ optional arguments:
                         argument for filtering
   -r, --read            read data for keys or tag list [requires the --keys or
                         --tags arguments]
-  -v, --version         print versionusage: command_line.py [-h] [-n [URL]] [-i] [-t NAME] [-c [CONFIG_FILE]]
-                       [-p [PASSWORD]] [-u [USERNAME]]
-                       [-a [TAG=VALUE [TAG=VALUE ...]]] [-k [KEY [KEY ...]]]
-                       [-l] [-r] [-v]
-                       [KEY=VALUE [KEY=VALUE ...]]
+  -v, --version         print version
 
 ```
 ### Querying metric definitions [ -l ]
