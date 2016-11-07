@@ -1,5 +1,5 @@
 from setuptools import setup
-from hawkular_client_cli.command_line import _VERSION
+from hawkular_client_cli.command_line import _VERSION, _DESCRIPTION
 
 setup(name='hawkular-client-cli',
     version=_VERSION,
