@@ -24,6 +24,7 @@ import re
 import ssl
 import argparse
 import yaml
+from datetime import datetime
 from future.moves.urllib.parse import urlparse
 from hawkular.metrics import HawkularMetricsClient, MetricType
 
@@ -154,7 +155,9 @@ class Cli(object):
             values = self.client.query_metric(MetricType.Gauge, key, limit=10)
             print('values:')
             for value in values:
-                print ('    ', value.get('timestamp'), value.get('value'))
+                timestamp = value.get('timestamp')
+                timestr = datetime.fromtimestamp(timestamp / 1000).strftime('%Y-%m-%d %H:%M:%S')
+                print ('    ', timestamp, '(', timestr, ')', value.get('value'))
             print()
 
     def _query_metric_by_tags(self):
@@ -168,7 +171,9 @@ class Cli(object):
             values = self.client.query_metric(MetricType.Gauge, key, limit=3)
             print('values:')
             for value in values:
-                print ('    ', value.get('timestamp'), value.get('value'))
+                timestamp = value.get('timestamp')
+                timestr = datetime.fromtimestamp(timestamp / 1000).strftime('%Y-%m-%d %H:%M:%S')
+                print ('    ', timestamp, '(', timestr, ')', value.get('value'))
             print()
 
     def _push(self):
