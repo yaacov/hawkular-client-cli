@@ -27,7 +27,7 @@ import yaml
 from future.moves.urllib.parse import urlparse
 from hawkular.metrics import HawkularMetricsClient, MetricType
 
-_VERSION = '0.7.2'
+_VERSION = '0.7.3'
 _DESCRIPTION = 'Read/Write data to and from a Hawkular metric server.'
 
 class Cli(object):
