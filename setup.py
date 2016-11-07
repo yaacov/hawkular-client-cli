@@ -4,7 +4,7 @@ from hawkular_client_cli.command_line import _VERSION
 setup(name='hawkular-client-cli',
     version=_VERSION,
     description='Hawkular client cli',
-    long_description='Hawkular client command line tool.',
+    long_description=_DESCRIPTION,
     classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
