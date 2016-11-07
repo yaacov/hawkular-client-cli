@@ -27,7 +27,7 @@ import yaml
 from future.moves.urllib.parse import urlparse
 from hawkular.metrics import HawkularMetricsClient, MetricType
 
-_VERSION = '0.6.1'
+_VERSION = '0.7.2'
 _DESCRIPTION = 'Read/Write data to and from a Hawkular metric server.'
 
 class Cli(object):
@@ -230,7 +230,7 @@ class Cli(object):
 
     def run(self):
         # Do actions list
-        if self.args.list and self.args.tags:
+        if self.args.list:
             self.log('List keys by tags:', self.args.tags)
             try:
                 self._query_metric_definitions()
