@@ -28,7 +28,7 @@ import ssl
 from future.moves.urllib.parse import urlparse
 from hawkular.metrics import HawkularMetricsClient, MetricType
 
-_VERSION = '0.5.1'
+_VERSION = '0.5.2'
 parser = argparse.ArgumentParser(description='Read/Write data to and from a Hawkular metric server.')
 
 # Read cli arguments
@@ -51,9 +51,9 @@ def _get_args():
     parser.add_argument('values', metavar='KEY=VALUE', type=str, nargs='*',
         help='key value pairs to send')
     parser.add_argument('-a', '--tags', metavar='TAG=VALUE', dest='tags', type=str, nargs='*',
-        help='a list of tags')
+        help='a list of tags [ when used with a list of keys, will update tags for this keys ]')
     parser.add_argument('-k', '--keys', metavar='KEY', dest='keys', type=str, nargs='*',
-        help='a list of keys')
+        help='a list of keys [ when used with a list of tags, will update tags for this keys ]')
     parser.add_argument('-l', '--list', action='store_true',
         help='list all registered keys, can be used with --tags argument for filtering')
     parser.add_argument('-r', '--read', action='store_true',
