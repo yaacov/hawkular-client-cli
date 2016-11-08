@@ -27,7 +27,7 @@ from datetime import datetime
 from future.moves.urllib.parse import urlparse
 from hawkular.metrics import HawkularMetricsClient, MetricType
 
-_VERSION = '0.8.1'
+_VERSION = '0.9.5'
 _DESCRIPTION = 'Read/Write data to and from a Hawkular metric server.'
 
 class CommandLine(object):
@@ -71,6 +71,9 @@ class CommandLine(object):
                             help='list all registered keys, can be used with --tags argument for filtering')
         parser.add_argument('-r', '--read', action='store_true',
                             help='read data for keys or tag list [requires the --keys or --tags arguments]')
+        parser.add_argument('-m', '--metric', choices=['gauge', 'counter', 'string', 'availability'],
+                            default='gauge',
+                            help='use specific metrics type [gauge, counter, string, availability]')
         parser.add_argument('-V', '--verbose', action='store_true',
                             help='be more verbose')
         parser.add_argument('-v', '--version', action='store_true',
@@ -80,6 +83,11 @@ class CommandLine(object):
         if args.version:
             print('hawkular-client-cli v' + _VERSION + '\n')
             sys.exit(1)
+
+        self.metric_type = {'gauge': MetricType.Gauge,
+                            'counter': MetricType.Counter,
+                            'string': MetricType.String,
+                            'availability': MetricType.Availability}[args.metric]
 
         self.parser = parser
         self.args = args
@@ -142,7 +150,7 @@ class CommandLine(object):
         """ Get a list of metric definitions
         """
         tags = dict([i.split("=")[0], i.split("=")[1]] for i in self.args.tags) if self.args.tags else {}
-        definitions = self.client.query_metric_definitions(**tags)
+        definitions = self.client.query_metric_definitions(metric_type=self.metric_type, **tags)
         for definition in definitions:
             print('key: ', definition.get('id'))
             print('tags:', definition.get('tags') or {})
@@ -153,7 +161,7 @@ class CommandLine(object):
         """
         for key in self.args.keys:
             print('key:', key)
-            values = self.client.query_metric(MetricType.Gauge, key, limit=10)
+            values = self.client.query_metric(self.metric_type, key, limit=10)
             print('values:')
             for value in values:
                 timestamp = value.get('timestamp')
@@ -165,11 +173,11 @@ class CommandLine(object):
         """ Get meric data
         """
         tags = dict([i.split("=")[0], i.split("=")[1]] for i in self.args.tags) if self.args.tags else {}
-        definitions = self.client.query_metric_definitions(**tags)
+        definitions = self.client.query_metric_definitions(metric_type=self.metric_type, **tags)
         for definition in definitions:
             key = definition.get('id')
             print('key:', key)
-            values = self.client.query_metric(MetricType.Gauge, key, limit=3)
+            values = self.client.query_metric(self.metric_type, key, limit=3)
             print('values:')
             for value in values:
                 timestamp = value.get('timestamp')
@@ -183,7 +191,7 @@ class CommandLine(object):
         for pair in self.args.values:
             key, value = pair.split("=")
             self.log('Push:', key, float(value))
-            self.client.push(MetricType.Gauge, key, float(value))
+            self.client.push(self.metric_type, key, float(value))
 
     def _update_metric_tags(self):
         """ Update metric tags
@@ -208,7 +216,7 @@ class CommandLine(object):
             # Update tags in Hawkular
             if key_tags != {}:
                 self.log('Update:', key, key_tags)
-                self.client.update_metric_tags(MetricType.Gauge, key, **key_tags)
+                self.client.update_metric_tags(self.metric_type, key, **key_tags)
 
     def _update_metric_tags_by_keys(self):
         """ Update metric tags
@@ -232,7 +240,7 @@ class CommandLine(object):
             # Update tags in Hawkular
             if key_tags != {}:
                 self.log('Update:', key, key_tags)
-                self.client.update_metric_tags(MetricType.Gauge, key, **key_tags)
+                self.client.update_metric_tags(self.metric_type, key, **key_tags)
 
     def run(self):
         """ Run the command line actions
