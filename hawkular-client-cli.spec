@@ -7,7 +7,7 @@ Summary:        Virtual machines deployment tool
 
 License:        GPLv2
 URL:            https://github.com/yaacov/%{name}
-Source0:        https://github.com/yaacov/%{name}/archive/%{name}-%{version}-1.tar.gz
+Source0:        https://github.com/yaacov/%{name}/archive/%{name}-%{version}.tar.gz
 
 BuildArch:      noarch
 BuildRequires:  python-devel
@@ -42,8 +42,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Tue Nov 08 2016 yaacov <kobi.zamir@gmail.com> 0.9.9-1
-
-- 
+- initial build
 
 * Tue Nov 08 2016 yaacov <kobi.zamir@gmail.com> - 0.9.8-1
 - initial build
