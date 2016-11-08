@@ -27,7 +27,7 @@ from datetime import datetime
 from future.moves.urllib.parse import urlparse
 from hawkular.metrics import HawkularMetricsClient, MetricType
 
-_VERSION = '0.9.5'
+_VERSION = '0.9.6'
 _DESCRIPTION = 'Read/Write data to and from a Hawkular metric server.'
 
 class CommandLine(object):
@@ -190,8 +190,8 @@ class CommandLine(object):
         """
         for pair in self.args.values:
             key, value = pair.split("=")
-            self.log('Push:', key, float(value))
-            self.client.push(self.metric_type, key, float(value))
+            self.log('Push:', key, value)
+            self.client.push(self.metric_type, key, value)
 
     def _update_metric_tags(self):
         """ Update metric tags
