@@ -27,7 +27,7 @@ from datetime import datetime
 from future.moves.urllib.parse import urlparse
 from hawkular.metrics import HawkularMetricsClient, MetricType
 
-_VERSION = '0.9.6'
+_VERSION = '0.9.7'
 _DESCRIPTION = 'Read/Write data to and from a Hawkular metric server.'
 
 class CommandLine(object):
