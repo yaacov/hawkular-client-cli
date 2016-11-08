@@ -15,7 +15,7 @@
     limitations under the License.
 """
 
-_VERSION = '0.9.8'
+_VERSION = '0.9.9'
 _DESCRIPTION = 'Read/Write data to and from a Hawkular metric server.'
 
 from __future__ import (absolute_import, division,
@@ -29,11 +29,7 @@ import argparse
 import yaml
 from datetime import datetime
 from future.moves.urllib.parse import urlparse
-try:
-    from hawkular.metrics import HawkularMetricsClient, MetricType
-except ImportError:
-    print('ERROR: can not find the hawkular-client python package, please install.', '\n')
-    sys.exit(1)
+from hawkular.metrics import HawkularMetricsClient, MetricType
 
 class CommandLine(object):
     def __init__(self):
