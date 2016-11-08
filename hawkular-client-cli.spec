@@ -15,6 +15,7 @@ BuildRequires:  python-setuptools
 
 Requires:       python-setuptools
 Requires:       python-future
+Requires:       PyYAML
 
 %description
 Utility script for accessing Hawkular metrics server remotely.

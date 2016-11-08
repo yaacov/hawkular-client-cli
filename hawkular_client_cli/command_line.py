@@ -14,6 +14,10 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 """
+
+_VERSION = '0.9.8'
+_DESCRIPTION = 'Read/Write data to and from a Hawkular metric server.'
+
 from __future__ import (absolute_import, division,
                         print_function, unicode_literals)
 
@@ -25,10 +29,11 @@ import argparse
 import yaml
 from datetime import datetime
 from future.moves.urllib.parse import urlparse
-from hawkular.metrics import HawkularMetricsClient, MetricType
-
-_VERSION = '0.9.7'
-_DESCRIPTION = 'Read/Write data to and from a Hawkular metric server.'
+try:
+    from hawkular.metrics import HawkularMetricsClient, MetricType
+except ImportError:
+    print('ERROR: can not find the hawkular-client python package, please install.', '\n')
+    sys.exit(1)
 
 class CommandLine(object):
     def __init__(self):
