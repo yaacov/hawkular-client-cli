@@ -1,7 +1,7 @@
 %{!?python_sitelib: %global python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")}
 
 Name:           hawkular-client-cli
-Version:        0.9.9
+Version:        0.9.10
 Release:        1%{?dist}
 Summary:        Virtual machines deployment tool
 
@@ -41,6 +41,10 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Wed Nov 09 2016 yaacov <kobi.zamir@gmail.com> 0.9.10-1
+- bump version (kobi.zamir@gmail.com)
+- edit spec file (kobi.zamir@gmail.com)
+
 * Tue Nov 08 2016 yaacov <kobi.zamir@gmail.com> 0.9.9-1
 - initial build
 
