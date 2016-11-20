@@ -15,11 +15,11 @@
     limitations under the License.
 """
 
-_VERSION = '0.9.9'
-_DESCRIPTION = 'Read/Write data to and from a Hawkular metric server.'
-
 from __future__ import (absolute_import, division,
                         print_function, unicode_literals)
+
+_VERSION = '0.9.10'
+_DESCRIPTION = 'Read/Write data to and from a Hawkular metric server.'
 
 import os
 import sys
