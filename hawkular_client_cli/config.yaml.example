@@ -1,7 +1,7 @@
 hawkular:
   url: https://yzamir-centos7-1.eng.lab.tlv.redhat.com:443
   username: hawkular
-  password: aM0tVkm81he_ovm
+  password: bi-rz57-Gl_a44F
   tenant: _ops
 rules:
   - regex: .*memory.*
