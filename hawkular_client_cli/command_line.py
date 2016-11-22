@@ -18,7 +18,7 @@
 from __future__ import (absolute_import, division,
                         print_function, unicode_literals)
 
-_VERSION = '0.9.10'
+_VERSION = '0.10.0'
 _DESCRIPTION = 'Read/Write data to and from a Hawkular metric server.'
 
 import os
@@ -112,6 +112,7 @@ class CommandLine(object):
         """
         url = self.args.url or self.config.get('hawkular').get('url') or None
         tenant = self.args.tenant or self.config.get('hawkular').get('tenant') or None
+        token = self.config.get('hawkular').get('token') or None
         username = self.args.username or self.config.get('hawkular').get('username') or None
         password = self.args.password or self.config.get('hawkular').get('password') or None
         context = ssl._create_unverified_context() if self.args.insecure else None
@@ -124,18 +125,18 @@ class CommandLine(object):
             print('Error: missing tenant\n')
             self.parser.print_help()
             sys.exit(1)
-        if not username:
+        if not token and not username:
             print('Error: missing username\n')
             self.parser.print_help()
             sys.exit(1)
-        if not password:
+        if not token and not password:
             print('Error: missing password\n')
             self.parser.print_help()
             sys.exit(1)
 
         try:
             url_args = urlparse(url)
-            client = HawkularMetricsClient(host=url_args.hostname, port=url_args.port,
+            client = HawkularMetricsClient(host=url_args.hostname, port=url_args.port, token=token,
                                            scheme=url_args.scheme, username=username, password=password,
                                            tenant_id=tenant, context=context)
             self.log('Connectd:', url_args.hostname, tenant, url_args.scheme, url_args.hostname, url_args.port)
