@@ -18,7 +18,7 @@
 from __future__ import (absolute_import, division,
                         print_function, unicode_literals)
 
-_VERSION = '0.11.0'
+_VERSION = '0.12.3'
 _DESCRIPTION = 'Read/Write data to and from a Hawkular metric server.'
 
 import os
@@ -32,6 +32,11 @@ from datetime import datetime, timedelta
 from dateutil.parser import *
 from future.moves.urllib.parse import urlparse
 from hawkular.metrics import HawkularMetricsClient, MetricType
+try:
+    from hawkular import HawkularAlertsClient
+except Exception as err:
+    # alert client is not implemented in regular lib (it's ok to fail here)
+    pass
 
 def valid_date(s):
     try:
@@ -95,6 +100,9 @@ class CommandLine(object):
         parser.add_argument('-e', "--end", dest='end', type=valid_date, nargs='?',
                             default=datetime.now(),
                             help="the end date for metrics reading")
+        parser.add_argument('-b', "--bucketDuration", dest='bucketDuration', type=int, nargs='?',
+                            default=0,
+                            help="the metrics atatistics reading bucket duration in secondes")
         parser.add_argument('--limit', dest='limit', type=int, nargs='?',
                             default=10,
                             help='limit for metrics reading')
@@ -102,6 +110,8 @@ class CommandLine(object):
                             help='be more verbose')
         parser.add_argument('--status', action='store_true',
                             help='query hawkular status')
+        parser.add_argument('--triggers', action='store_true',
+                            help='query hawkular alert triggers')
         parser.add_argument('-v', '--version', action='store_true',
                             help='print version')
         args = parser.parse_args()
@@ -171,14 +181,33 @@ class CommandLine(object):
             self.parser.print_help()
             sys.exit(1)
 
+        try:
+            self.alert_client = HawkularAlertsClient(host=url_args.hostname, port=url_args.port, token=token,
+                                           scheme=url_args.scheme, username=username, password=password,
+                                           tenant_id=tenant, context=context)
+        except Exception as err:
+            # alert client is not implemented in regular lib (it's ok to fail here)
+            pass
+
         self.client = client
 
     def _query_status(self):
         """ Query Hawkular server status
         """
-        status = self.client.status()
+        status = self.alert_client.status()
         print(status)
         print()
+
+    def _query_triggers(self):
+        """ Query Hawkular server alerts
+        """
+        triggers = self.alert_client.list_triggers()
+        for trigger in triggers:
+            print('key: ', trigger.id)
+            print('name:', trigger.name)
+            print('description:', trigger.description)
+            print('enabled:', trigger.enabled)
+            print()
 
     def _query_metric_definitions(self):
         """ Get a list of metric definitions
@@ -188,6 +217,23 @@ class CommandLine(object):
         for definition in definitions:
             print('key: ', definition.get('id'))
             print('tags:', definition.get('tags') or {})
+            print()
+
+    def _query_metric_stats_by_keys(self):
+        """ get meric data
+        """
+        for key in self.args.keys:
+            print('key:', key)
+            values = self.client.query_metric_stats(self.metric_type, key,
+                start=int(total_milisecond(self.args.start)),
+                end=int(total_milisecond(self.args.end)),
+                bucketDuration="{0}s".format(self.args.bucketDuration),
+                limit=self.args.limit)
+            print('values:')
+            for value in values:
+                timestamp = value.get('start')
+                timestr = datetime.fromtimestamp(timestamp / 1000).strftime('%Y-%m-%d %H:%M:%S')
+                print ('    ', timestamp, '(', timestr, ') avg:', value.get('avg'), '[',value.get('samples'), ']')
             print()
 
     def _query_metric_by_keys(self):
@@ -223,6 +269,26 @@ class CommandLine(object):
                 timestamp = value.get('timestamp')
                 timestr = datetime.fromtimestamp(timestamp / 1000).strftime('%Y-%m-%d %H:%M:%S')
                 print ('    ', timestamp, '(', timestr, ')', value.get('value'))
+            print()
+
+    def _query_metric_stats_by_tags(self):
+        """ Get meric data
+        """
+        tags = dict([i.split("=")[0], i.split("=")[1]] for i in self.args.tags) if self.args.tags else {}
+        definitions = self.client.query_metric_definitions(metric_type=self.metric_type, **tags)
+        for definition in definitions:
+            key = definition.get('id')
+            print('key:', key)
+            values = self.client.query_metric_stats(self.metric_type, key,
+                start=int(total_milisecond(self.args.start)),
+                end=int(total_milisecond(self.args.end)),
+                bucketDuration="{0}s".format(self.args.bucketDuration),
+                limit=self.args.limit)
+            print('values:')
+            for value in values:
+                timestamp = value.get('start')
+                timestr = datetime.fromtimestamp(timestamp / 1000).strftime('%Y-%m-%d %H:%M:%S')
+                print ('    ', timestamp, '(', timestr, ') avg:', value.get('avg'), '[',value.get('samples'), ']')
             print()
 
     def _push(self):
@@ -287,9 +353,18 @@ class CommandLine(object):
         """
         # Do query status
         if self.args.status:
-            self.log('Hawkualr status:', self.args.tags)
+            self.log('Hawkualr alerts status:')
             try:
                 self._query_status()
+            except Exception as err:
+                print(err, '\n')
+                sys.exit(1)
+
+        # Do query triggers
+        if self.args.triggers:
+            self.log('Hawkualr alerts triggers:')
+            try:
+                self._query_triggers()
             except Exception as err:
                 print(err, '\n')
                 sys.exit(1)
@@ -305,9 +380,12 @@ class CommandLine(object):
 
         # Do actions read keys
         if self.args.read and self.args.keys:
-            self.log('Read metrics values by keys:')
+            self.log('Read metrics values by keys:', self.args.keys)
             try:
-                self._query_metric_by_keys()
+                if self.args.bucketDuration == 0:
+                    self._query_metric_by_keys()
+                else:
+                    self._query_metric_stats_by_keys()
             except Exception as err:
                 print(err, '\n')
                 sys.exit(1)
@@ -316,7 +394,10 @@ class CommandLine(object):
         if self.args.read and self.args.tags:
             self.log('Read metrics values by tags:', self.args.tags)
             try:
-                self._query_metric_by_tags()
+                if self.args.bucketDuration == 0:
+                    self._query_metric_by_tags()
+                else:
+                    self._query_metric_stats_by_tags()
             except Exception as err:
                 print(err, '\n')
                 sys.exit(1)
