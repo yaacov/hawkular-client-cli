@@ -20,7 +20,8 @@ setup(name='hawkular-client-cli',
     packages=['hawkular_client_cli'],
     install_requires=[
         'future',
-        'pyyaml',
+        'python-dateutil',
+        'PyYAML',
         'hawkular-client',
     ],
     entry_points={

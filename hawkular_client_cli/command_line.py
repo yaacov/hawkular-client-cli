@@ -18,7 +18,7 @@
 from __future__ import (absolute_import, division,
                         print_function, unicode_literals)
 
-_VERSION = '0.10.0'
+_VERSION = '0.11.0'
 _DESCRIPTION = 'Read/Write data to and from a Hawkular metric server.'
 
 import os
@@ -27,9 +27,21 @@ import re
 import ssl
 import argparse
 import yaml
-from datetime import datetime
+import time
+from datetime import datetime, timedelta
+from dateutil.parser import *
 from future.moves.urllib.parse import urlparse
 from hawkular.metrics import HawkularMetricsClient, MetricType
+
+def valid_date(s):
+    try:
+        return parse(s)
+    except ValueError:
+        msg = "Not a valid date: '{0}'.".format(s)
+        raise argparse.ArgumentTypeError(msg)
+
+def total_milisecond(t):
+    return time.mktime(t.timetuple())*1e3
 
 class CommandLine(object):
     def __init__(self):
@@ -60,6 +72,8 @@ class CommandLine(object):
                             help='Configurations file path')
         parser.add_argument('-p', '--password', dest='password', type=str, nargs='?',
                             help='Hawkualr server password')
+        parser.add_argument('--token', dest='token', type=str, nargs='?',
+                            help='Hawkualr server token')
         parser.add_argument('-u', '--username', dest='username', type=str, nargs='?',
                             help='Hawkualr server username')
         parser.add_argument('values', metavar='KEY=VALUE', type=str, nargs='*',
@@ -75,8 +89,19 @@ class CommandLine(object):
         parser.add_argument('-m', '--metric', choices=['gauge', 'counter', 'string', 'availability'],
                             default='gauge',
                             help='use specific metrics type [gauge, counter, string, availability]')
+        parser.add_argument('-s', "--start", dest='start', type=valid_date, nargs='?',
+                            default=datetime.now() - timedelta(hours=8),
+                            help="the start date for metrics reading")
+        parser.add_argument('-e', "--end", dest='end', type=valid_date, nargs='?',
+                            default=datetime.now(),
+                            help="the end date for metrics reading")
+        parser.add_argument('--limit', dest='limit', type=int, nargs='?',
+                            default=10,
+                            help='limit for metrics reading')
         parser.add_argument('-V', '--verbose', action='store_true',
                             help='be more verbose')
+        parser.add_argument('--status', action='store_true',
+                            help='query hawkular status')
         parser.add_argument('-v', '--version', action='store_true',
                             help='print version')
         args = parser.parse_args()
@@ -112,7 +137,7 @@ class CommandLine(object):
         """
         url = self.args.url or self.config.get('hawkular').get('url') or None
         tenant = self.args.tenant or self.config.get('hawkular').get('tenant') or None
-        token = self.config.get('hawkular').get('token') or None
+        token = self.args.token or self.config.get('hawkular').get('token') or None
         username = self.args.username or self.config.get('hawkular').get('username') or None
         password = self.args.password or self.config.get('hawkular').get('password') or None
         context = ssl._create_unverified_context() if self.args.insecure else None
@@ -148,6 +173,13 @@ class CommandLine(object):
 
         self.client = client
 
+    def _query_status(self):
+        """ Query Hawkular server status
+        """
+        status = self.client.status()
+        print(status)
+        print()
+
     def _query_metric_definitions(self):
         """ Get a list of metric definitions
         """
@@ -163,7 +195,10 @@ class CommandLine(object):
         """
         for key in self.args.keys:
             print('key:', key)
-            values = self.client.query_metric(self.metric_type, key, limit=10)
+            values = self.client.query_metric(self.metric_type, key,
+                start=int(total_milisecond(self.args.start)),
+                end=int(total_milisecond(self.args.end)),
+                limit=self.args.limit)
             print('values:')
             for value in values:
                 timestamp = value.get('timestamp')
@@ -179,7 +214,10 @@ class CommandLine(object):
         for definition in definitions:
             key = definition.get('id')
             print('key:', key)
-            values = self.client.query_metric(self.metric_type, key, limit=3)
+            values = self.client.query_metric(self.metric_type, key,
+                start=int(total_milisecond(self.args.start)),
+                end=int(total_milisecond(self.args.end)),
+                limit=self.args.limit)
             print('values:')
             for value in values:
                 timestamp = value.get('timestamp')
@@ -247,6 +285,15 @@ class CommandLine(object):
     def run(self):
         """ Run the command line actions
         """
+        # Do query status
+        if self.args.status:
+            self.log('Hawkualr status:', self.args.tags)
+            try:
+                self._query_status()
+            except Exception as err:
+                print(err, '\n')
+                sys.exit(1)
+
         # Do actions list
         if self.args.list:
             self.log('List keys by tags:', self.args.tags)
