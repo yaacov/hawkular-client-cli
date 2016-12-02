@@ -108,8 +108,8 @@ hawkular-client-cli --triggers
 ```
 
 ### Querying metric data [ --read KEY ]
-Query for metrics data can be done using a list of keys [ using the -k argument ]
-or using a list of tag,value pairs [ using the -a argument ]
+Query for metrics data can be done using a list of keys [ using the -keys argument ]
+or using a list of tag,value pairs [ using the --tags argument ]
 
 ```bash
 hawkular-client-cli --read --keys machine/example.com/memory.usage
@@ -118,7 +118,7 @@ hawkular-client-cli --read --tags issue=42
 
 ### Pushing new values [ KEY=VALUE ]
 When pushing new data, we also update the tag values of the keys we push data to,
-If not explicit tags are defined ( e.g. using the -a argument ) tags are set using
+If not explicit tags are defined ( e.g. using the --tags argument ) tags are set using
 rules in the config file.
 
 ```bash
@@ -128,7 +128,7 @@ hawkular-client-cli machine/example.com/memory.usage=300
 ### Modifying metric definition tags [ --keys KEY --tags TAG=VALUE ]
 If a key match an auto-tagging rule from a config file, the tag value defined
 in the config file will be updated. Explicit tag values defined using the command line
-argument [ -a or --tags ] will override tag values defined by rules in the config file.
+argument [ --tags ] will override tag values defined by rules in the config file.
 
 ```bash
 hawkular-client-cli --keys machine/example.com/memory.usage --tags units=bytes
