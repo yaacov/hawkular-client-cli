@@ -107,7 +107,7 @@ Display alert triggers list (Requires hawkular-client-python >= 0.4.5).
 hawkular-client-cli --triggers
 ```
 
-### Querying metric data [ --read KEY ]
+### Querying metric data [ --read [--keys KEY] [--tags TAG=VALUE] ]
 Query for metrics data can be done using a list of keys [ using the -keys argument ]
 or using a list of tag,value pairs [ using the --tags argument ]
 
