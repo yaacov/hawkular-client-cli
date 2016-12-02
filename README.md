@@ -100,7 +100,7 @@ hawkular-client-cli --list
 hawkular-client-cli --list --tags issue=42
 ```
 
-### Querying metric definitions [ --triggers ]
+### Querying alert triggers [ --triggers ]
 Display alert triggers list (Requires hawkular-client-python >= 0.4.5).
 
 ```bash
