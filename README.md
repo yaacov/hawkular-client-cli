@@ -38,11 +38,14 @@ The `-h` flag will print out a help text, that list the command line arguments.
 ```bash
 hawkular-client-cli -h
 
-usage: command_line.py [-h] [-n [URL]] [-i] [-t NAME] [-c [CONFIG_FILE]]
-                       [-p [PASSWORD]] [-u [USERNAME]]
-                       [-a [TAG=VALUE [TAG=VALUE ...]]] [-k [KEY [KEY ...]]]
-                       [-l] [-r] [-v]
-                       [KEY=VALUE [KEY=VALUE ...]]
+usage: hawkular-client-cli [-h] [--url URL] [-i] [-t NAME] [-c [CONFIG_FILE]]
+                           [-p [PASSWORD]] [--token [TOKEN]] [-u [USERNAME]]
+                           [-a [TAG=VALUE [TAG=VALUE ...]]]
+                           [-k [KEY [KEY ...]]] [-l] [-r]
+                           [-m {gauge,counter,string,availability}]
+                           [-s [START]] [-e [END]] [-b [BUCKETDURATION]]
+                           [--limit [LIMIT]] [-V] [--status] [--triggers] [-v]
+                           [KEY=VALUE [KEY=VALUE ...]]
 
 Read/Write data to and from a Hawkular metric server.
 
@@ -51,8 +54,7 @@ positional arguments:
 
 optional arguments:
   -h, --help            show this help message and exit
-  -n [URL], --url [URL]
-                        Hawkualr server url
+  --url URL             Hawkualr server url
   -i, --insecure        allow insecure ssl connection
   -t NAME, --tenant NAME
                         Hawkualr tenenat name
@@ -60,6 +62,7 @@ optional arguments:
                         Configurations file path
   -p [PASSWORD], --password [PASSWORD]
                         Hawkualr server password
+  --token [TOKEN]       Hawkualr server token
   -u [USERNAME], --username [USERNAME]
                         Hawkualr server username
   -a [TAG=VALUE [TAG=VALUE ...]], --tags [TAG=VALUE [TAG=VALUE ...]]
@@ -72,24 +75,47 @@ optional arguments:
                         argument for filtering
   -r, --read            read data for keys or tag list [requires the --keys or
                         --tags arguments]
+  -m {gauge,counter,string,availability}, --metric {gauge,counter,string,availability}
+                        use specific metrics type [gauge, counter, string,
+                        availability]
+  -s [START], --start [START]
+                        the start date for metrics reading
+  -e [END], --end [END]
+                        the end date for metrics reading
+  -b [BUCKETDURATION], --bucketDuration [BUCKETDURATION]
+                        the metrics statistics reading bucket duration in
+                        seconds
+  --limit [LIMIT]       limit for metrics reading
+  -V, --verbose         be more verbose
+  --status              query hawkular status
+  --triggers            query hawkular alert triggers
   -v, --version         print version
 
 ```
-### Querying metric definitions [ -l ]
+### Querying metric definitions [ --list ]
 Metric definitions list can also be filtered using tags.
 
 ```bash
-hawkular-client-cli -l
-hawkular-client-cli -l -a issue=42
+hawkular-client-cli --list
+hawkular-client-cli --list --tags issue=42
 ```
-### Querying metric data [ -r KEY ]
+
+### Querying metric definitions [ --triggers ]
+Display alert triggers list (Requires hawkular-client-python >= 0.4.5).
+
+```bash
+hawkular-client-cli --triggers
+```
+
+### Querying metric data [ --read KEY ]
 Query for metrics data can be done using a list of keys [ using the -k argument ]
 or using a list of tag,value pairs [ using the -a argument ]
 
 ```bash
-hawkular-client-cli -r -k machine/example.com/memory.usage
-hawkular-client-cli -r -a issue=42
+hawkular-client-cli --read --keys machine/example.com/memory.usage
+hawkular-client-cli --read --tags issue=42
 ```
+
 ### Pushing new values [ KEY=VALUE ]
 When pushing new data, we also update the tag values of the keys we push data to,
 If not explicit tags are defined ( e.g. using the -a argument ) tags are set using
@@ -98,13 +124,14 @@ rules in the config file.
 ```bash
 hawkular-client-cli machine/example.com/memory.usage=300
 ```
-### Modifying metric definition tags [ -k KEY -a TAG=VALUE ]
+
+### Modifying metric definition tags [ --keys KEY --tags TAG=VALUE ]
 If a key match an auto-tagging rule from a config file, the tag value defined
 in the config file will be updated. Explicit tag values defined using the command line
 argument [ -a or --tags ] will override tag values defined by rules in the config file.
 
 ```bash
-hawkular-client-cli -k machine/example.com/memory.usage -a units=bytes
+hawkular-client-cli --keys machine/example.com/memory.usage --tags units=bytes
 ```
 
 ### Config file
@@ -120,6 +147,7 @@ for example, username and password.
 The auto-tagging rules match the rules regex with pre-defined tags, for example, the rules
 in this example will add the tag `units` with value `bytes` to any key that match the regex pattern `.*memory.*`.
 
+#### Using key and password
 ```yaml
 hawkular:
   url: https:/hawkular-metrics.com:443
@@ -127,14 +155,23 @@ hawkular:
   password: secret
   tenant: _ops
 rules:
-  - regex: .*
-    tags:
-      type: node
-      hostname: example.com
   - regex: .*memory.*
     tags:
       units: byte
   - regex: .*cpu.*
     tags:
       units: cpu
+```
+
+#### using a token
+```yaml
+hawkular:
+  url: https:/hawkular-metrics.com:443
+  token: secret
+  tenant: _ops
+rules:
+  - regex: .*
+    tags:
+      type: node
+      hostname: example.com
 ```
