@@ -1,5 +1,7 @@
 from setuptools import setup
-from hawkular_client_cli.command_line import _VERSION, _DESCRIPTION
+
+_VERSION = '0.13.2'
+_DESCRIPTION = 'Read/Write data to and from a Hawkular metric server.'
 
 setup(name='hawkular-client-cli',
     version=_VERSION,
