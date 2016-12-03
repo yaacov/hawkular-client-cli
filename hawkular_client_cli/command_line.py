@@ -18,7 +18,7 @@
 from __future__ import (absolute_import, division,
                         print_function, unicode_literals)
 
-_VERSION = '0.13.2'
+_VERSION = '0.13.3'
 _DESCRIPTION = 'Read/Write data to and from a Hawkular metric server.'
 
 import os
@@ -77,7 +77,7 @@ class CommandLine(object):
                             help='Configurations file path')
         parser.add_argument('-p', '--password', dest='password', type=str, nargs='?',
                             help='Hawkualr server password')
-        parser.add_argument('--token', dest='token', type=str, nargs='?',
+        parser.add_argument('-T', '--token', dest='token', type=str, nargs='?',
                             help='Hawkualr server token')
         parser.add_argument('-u', '--username', dest='username', type=str, nargs='?',
                             help='Hawkualr server username')
