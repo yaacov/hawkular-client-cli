@@ -18,7 +18,7 @@
 from __future__ import (absolute_import, division,
                         print_function, unicode_literals)
 
-_VERSION = '0.12.3'
+_VERSION = '0.13.1'
 _DESCRIPTION = 'Read/Write data to and from a Hawkular metric server.'
 
 import os
@@ -66,11 +66,11 @@ class CommandLine(object):
         """ Get and parse command lint arguments
         """
         parser = argparse.ArgumentParser(description=_DESCRIPTION)
-        parser.add_argument('--url', dest='url', type=str,
+        parser.add_argument('-U', '--url', dest='url', type=str,
                             help='Hawkualr server url')
         parser.add_argument('-i', '--insecure', action='store_true',
                             help='allow insecure ssl connection')
-        parser.add_argument('-t', '--tenant', metavar='NAME', type=str,
+        parser.add_argument('-t', '--tenant', metavar='TENANT', type=str,
                             help='Hawkualr tenenat name')
         parser.add_argument('-c', '--config', dest='config_file', type=str, nargs='?',
                             default='/etc/hawkular-client-cli/conifg.yaml',
@@ -112,6 +112,8 @@ class CommandLine(object):
                             help='query hawkular status')
         parser.add_argument('--triggers', action='store_true',
                             help='query hawkular alert triggers')
+        parser.add_argument('-N', '--no-autotags', dest='no_autotags', action='store_true',
+                            help='do not update tags using the config file')
         parser.add_argument('-v', '--version', action='store_true',
                             help='print version')
         args = parser.parse_args()
@@ -305,7 +307,10 @@ class CommandLine(object):
         # Get tags from command line args
         tags = dict([i.split("=")[0], i.split("=")[1]] for i in self.args.tags) if self.args.tags else {}
         # Get tags rules from the config file
-        rules = self.config.get('rules') or []
+        if self.args.no_autotags:
+            rules = []
+        else:
+            rules = self.config.get('rules') or []
 
         for pair in self.args.values:
             key = pair.split("=")[0]
@@ -330,7 +335,10 @@ class CommandLine(object):
         # Get tags from command line args
         tags = dict([i.split("=")[0], i.split("=")[1]] for i in self.args.tags) if self.args.tags else {}
         # Get tags rules from the config file
-        rules = self.config.get('rules') or []
+        if self.args.no_autotags:
+            rules = []
+        else:
+            rules = self.config.get('rules') or []
 
         for key in self.args.keys:
             # Clean the tags for this key
