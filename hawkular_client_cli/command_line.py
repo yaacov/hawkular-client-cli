@@ -18,7 +18,7 @@
 from __future__ import (absolute_import, division,
                         print_function, unicode_literals)
 
-_VERSION = '0.13.3'
+_VERSION = '0.15.1'
 _DESCRIPTION = 'Read/Write data to and from a Hawkular metric server.'
 
 import os
@@ -147,12 +147,13 @@ class CommandLine(object):
     def _get_client(self):
         """ Create a Hawkular metrics client
         """
-        url = self.args.url or self.config.get('hawkular').get('url') or None
-        tenant = self.args.tenant or self.config.get('hawkular').get('tenant') or None
-        token = self.args.token or self.config.get('hawkular').get('token') or None
-        username = self.args.username or self.config.get('hawkular').get('username') or None
-        password = self.args.password or self.config.get('hawkular').get('password') or None
-        context = ssl._create_unverified_context() if self.args.insecure else None
+        url = self.args.url or self.config.get('hawkular').get('url') or os.environ.get('HAWKULAR_URL')
+        tenant = self.args.tenant or self.config.get('hawkular').get('tenant') or os.environ.get('HAWKULAR_TENANT')
+        token = self.args.token or self.config.get('hawkular').get('token') or os.environ.get('HAWKULAR_TOKEN')
+        username = self.args.username or self.config.get('hawkular').get('username') or os.environ.get('HAWKULAR_USERNAME')
+        password = self.args.password or self.config.get('hawkular').get('password') or os.environ.get('HAWKULAR_PASSWORD')
+        insecure = self.args.insecure or self.config.get('hawkular').get('insecure') or False
+        context = ssl._create_unverified_context() if insecure else None
 
         if not url:
             print('Error: missing url\n')
@@ -196,7 +197,7 @@ class CommandLine(object):
     def _query_status(self):
         """ Query Hawkular server status
         """
-        status = self.alert_client.status()
+        status = self.client.status()
         print(status)
         print()
 

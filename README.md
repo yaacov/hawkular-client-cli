@@ -150,7 +150,7 @@ in this example will add the tag `units` with value `bytes` to any key that matc
 #### Using key and password
 ```yaml
 hawkular:
-  url: https:/hawkular-metrics.com:443
+  url: https://hawkular-metrics.com:443
   username: hawkular
   password: secret
   tenant: _ops
@@ -166,9 +166,10 @@ rules:
 #### using a token
 ```yaml
 hawkular:
-  url: https:/hawkular-metrics.com:443
+  url: https://hawkular-metrics.com:443
   token: secret
   tenant: _ops
+  insecure: False
 rules:
   - regex: .*
     tags:
