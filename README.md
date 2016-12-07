@@ -38,13 +38,14 @@ The `-h` flag will print out a help text, that list the command line arguments.
 ```bash
 hawkular-client-cli -h
 
-usage: hawkular-client-cli [-h] [--url URL] [-i] [-t NAME] [-c [CONFIG_FILE]]
-                           [-p [PASSWORD]] [--token [TOKEN]] [-u [USERNAME]]
+usage: hawkular-client-cli [-h] [-U URL] [-i] [-t TENANT] [-c [CONFIG_FILE]]
+                           [-p [PASSWORD]] [-T [TOKEN]] [-u [USERNAME]]
                            [-a [TAG=VALUE [TAG=VALUE ...]]]
                            [-k [KEY [KEY ...]]] [-l] [-r]
                            [-m {gauge,counter,string,availability}]
                            [-s [START]] [-e [END]] [-b [BUCKETDURATION]]
-                           [--limit [LIMIT]] [-V] [--status] [--triggers] [-v]
+                           [--limit [LIMIT]] [-V] [--status] [--triggers] [-N]
+                           [-v]
                            [KEY=VALUE [KEY=VALUE ...]]
 
 Read/Write data to and from a Hawkular metric server.
@@ -54,15 +55,16 @@ positional arguments:
 
 optional arguments:
   -h, --help            show this help message and exit
-  --url URL             Hawkualr server url
+  -U URL, --url URL     Hawkualr server url
   -i, --insecure        allow insecure ssl connection
-  -t NAME, --tenant NAME
+  -t TENANT, --tenant TENANT
                         Hawkualr tenenat name
   -c [CONFIG_FILE], --config [CONFIG_FILE]
                         Configurations file path
   -p [PASSWORD], --password [PASSWORD]
                         Hawkualr server password
-  --token [TOKEN]       Hawkualr server token
+  -T [TOKEN], --token [TOKEN]
+                        Hawkualr server token
   -u [USERNAME], --username [USERNAME]
                         Hawkualr server username
   -a [TAG=VALUE [TAG=VALUE ...]], --tags [TAG=VALUE [TAG=VALUE ...]]
@@ -83,12 +85,13 @@ optional arguments:
   -e [END], --end [END]
                         the end date for metrics reading
   -b [BUCKETDURATION], --bucketDuration [BUCKETDURATION]
-                        the metrics statistics reading bucket duration in
-                        seconds
+                        the metrics atatistics reading bucket duration in
+                        secondes
   --limit [LIMIT]       limit for metrics reading
   -V, --verbose         be more verbose
   --status              query hawkular status
   --triggers            query hawkular alert triggers
+  -N, --no-autotags     do not update tags using the config file
   -v, --version         print version
 
 ```
@@ -175,4 +178,17 @@ rules:
     tags:
       type: node
       hostname: example.com
+```
+
+### Environment variables
+If present, environment variables, can be used to store credentials information. Command line arguments and config file settings, will override credentials defined in environment variables.
+
+```bash
+# supported vars
+# HAWKULAR_URL, HAWKULAR_TENANT, HAWKULAR_TOKEN, HAWKULAR_USERNAME and HAWKULAR_PASSWORD
+
+export HAWKULAR_URL=https://example.com:8443
+export HAWKULAR_TENANT=_system
+export HAWKULAR_TOKEN=some.secret
+hawkular-client-cli -l
 ```
