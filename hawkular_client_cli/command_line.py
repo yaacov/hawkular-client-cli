@@ -18,7 +18,7 @@
 from __future__ import (absolute_import, division,
                         print_function, unicode_literals)
 
-_VERSION = '0.15.2'
+_VERSION = '0.16.1'
 _DESCRIPTION = 'Read/Write data to and from a Hawkular metric server.'
 
 import os
@@ -106,6 +106,8 @@ class CommandLine(object):
         parser.add_argument('--limit', dest='limit', type=int, nargs='?',
                             default=10,
                             help='limit for metrics reading')
+        parser.add_argument('--auto-api', action='store_true',
+                            help='check api version before query server')
         parser.add_argument('-V', '--verbose', action='store_true',
                             help='be more verbose')
         parser.add_argument('--status', action='store_true',
@@ -153,6 +155,7 @@ class CommandLine(object):
         username = self.args.username or self.config.get('hawkular').get('username') or os.environ.get('HAWKULAR_USERNAME')
         password = self.args.password or self.config.get('hawkular').get('password') or os.environ.get('HAWKULAR_PASSWORD')
         insecure = self.args.insecure or self.config.get('hawkular').get('insecure') or False
+        auto_api = self.args.auto_api or self.config.get('hawkular').get('auto_api') or False
         context = ssl._create_unverified_context() if insecure else None
 
         if not url:
@@ -176,7 +179,7 @@ class CommandLine(object):
             url_args = urlparse(url)
             client = HawkularMetricsClient(host=url_args.hostname, port=url_args.port, token=token,
                                            scheme=url_args.scheme, username=username, password=password,
-                                           tenant_id=tenant, context=context)
+                                           tenant_id=tenant, context=context, auto_set_legacy_api=auto_api)
             self.log('Connectd:', url_args.hostname, tenant, url_args.scheme, url_args.hostname, url_args.port)
         except Exception as err:
             print('[ERROR] Not Connectd:', url_args.hostname, tenant, url_args.scheme, url_args.hostname, url_args.port)
@@ -187,7 +190,7 @@ class CommandLine(object):
         try:
             self.alert_client = HawkularAlertsClient(host=url_args.hostname, port=url_args.port, token=token,
                                            scheme=url_args.scheme, username=username, password=password,
-                                           tenant_id=tenant, context=context)
+                                           tenant_id=tenant, context=context, auto_set_legacy_api=auto_api)
         except Exception as err:
             # alert client is not implemented in regular lib (it's ok to fail here)
             pass
@@ -197,7 +200,7 @@ class CommandLine(object):
     def _query_status(self):
         """ Query Hawkular server status
         """
-        status = self.client.status()
+        status = self.client.query_status()
         print(status)
         print()
 
