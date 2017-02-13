@@ -18,7 +18,7 @@
 from __future__ import (absolute_import, division,
                         print_function, unicode_literals)
 
-_VERSION = '0.16.1'
+_VERSION = '0.16.2'
 _DESCRIPTION = 'Read/Write data to and from a Hawkular metric server.'
 
 import os
@@ -139,7 +139,7 @@ class CommandLine(object):
         config = {}
         if os.path.exists(self.args.config_file):
             self.log('Reading config file', self.args.config_file)
-            config = yaml.load(file(self.args.config_file))
+            config = yaml.load(open(self.args.config_file))
         config['hawkular'] = config.get('hawkular', {})
         config['tags'] = config.get('tags', [])
 
