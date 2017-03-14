@@ -18,7 +18,7 @@
 from __future__ import (absolute_import, division,
                         print_function, unicode_literals)
 
-_VERSION = '0.16.2'
+_VERSION = '0.16.3'
 _DESCRIPTION = 'Read/Write data to and from a Hawkular metric server.'
 
 import os
@@ -121,7 +121,7 @@ class CommandLine(object):
         args = parser.parse_args()
 
         if args.version:
-            print('hawkular-client-cli v' + _VERSION + '\n')
+            print('hawkular-cli v' + _VERSION + '\n')
             sys.exit(1)
 
         self.metric_type = {'gauge': MetricType.Gauge,

@@ -36,9 +36,9 @@ To install, run ``python setup.py install`` if you installed from source code, o
 The `-h` flag will print out a help text, that list the command line arguments.
 
 ```bash
-hawkular-client-cli -h
+hawkular-cli -h
 
-usage: hawkular-client-cli [-h] [-U URL] [-i] [-t TENANT] [-c [CONFIG_FILE]]
+usage: hawkular-cli [-h] [-U URL] [-i] [-t TENANT] [-c [CONFIG_FILE]]
                            [-p [PASSWORD]] [-T [TOKEN]] [-u [USERNAME]]
                            [-a [TAG=VALUE [TAG=VALUE ...]]]
                            [-k [KEY [KEY ...]]] [-l] [-r]
@@ -99,15 +99,15 @@ optional arguments:
 Metric definitions list can also be filtered using tags.
 
 ```bash
-hawkular-client-cli --list
-hawkular-client-cli --list --tags issue=42
+hawkular-cli --list
+hawkular-cli --list --tags issue=42
 ```
 
 ### Querying alert triggers [ --triggers ]
 Display alert triggers list (Requires hawkular-client-python >= 0.4.5).
 
 ```bash
-hawkular-client-cli --triggers
+hawkular-cli --triggers
 ```
 
 ### Querying metric data [ --read [--keys KEY] [--tags TAG=VALUE] ]
@@ -115,8 +115,8 @@ Query for metrics data can be done using a list of keys [ using the -keys argume
 or using a list of tag,value pairs [ using the --tags argument ]
 
 ```bash
-hawkular-client-cli --read --keys machine/example.com/memory.usage
-hawkular-client-cli --read --tags issue=42
+hawkular-cli --read --keys machine/example.com/memory.usage
+hawkular-cli --read --tags issue=42
 ```
 
 ### Pushing new values [ KEY=VALUE ]
@@ -125,7 +125,7 @@ If not explicit tags are defined ( e.g. using the --tags argument ) tags are set
 rules in the config file.
 
 ```bash
-hawkular-client-cli machine/example.com/memory.usage=300
+hawkular-cli machine/example.com/memory.usage=300
 ```
 
 ### Modifying metric definition tags [ --keys KEY --tags TAG=VALUE ]
@@ -134,7 +134,7 @@ in the config file will be updated. Explicit tag values defined using the comman
 argument [ --tags ] will override tag values defined by rules in the config file.
 
 ```bash
-hawkular-client-cli --keys machine/example.com/memory.usage --tags units=bytes
+hawkular-cli --keys machine/example.com/memory.usage --tags units=bytes
 ```
 
 ### Config file

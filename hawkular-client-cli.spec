@@ -1,9 +1,9 @@
 %{!?python_sitelib: %global python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")}
 
 Name:           hawkular-client-cli
-Version:        0.9.10
+Version:        0.16.3
 Release:        1%{?dist}
-Summary:        Virtual machines deployment tool
+Summary:        Read/Write data to and from a Hawkular metric server.
 
 License:        GPLv2
 URL:            https://github.com/yaacov/%{name}
@@ -13,7 +13,7 @@ BuildArch:      noarch
 BuildRequires:  python-devel
 BuildRequires:  python-setuptools
 
-Requires:       python-setuptools
+Requires:       python-hawkular-client
 Requires:       python-future
 Requires:       PyYAML
 
@@ -36,11 +36,15 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %doc README.md COPYING
-%{_bindir}/hawkular-client-cli
+%{_bindir}/hawkular-cli
 %{python_sitelib}/*
 
 
 %changelog
+* Tue Mar 14 2017 yaacov <kobi.zamir@gmail.com> 0.16-2-1
+- bump version (kobi.zamir@gmail.com)
+- edit spec file (kobi.zamir@gmail.com)
+
 * Wed Nov 09 2016 yaacov <kobi.zamir@gmail.com> 0.9.10-1
 - bump version (kobi.zamir@gmail.com)
 - edit spec file (kobi.zamir@gmail.com)
