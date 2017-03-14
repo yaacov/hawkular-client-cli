@@ -1,13 +1,13 @@
 %{!?python_sitelib: %global python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")}
 
 Name:           hawkular-client-cli
-Version:        0.16.3
+Version:        0.16.4
 Release:        1%{?dist}
 Summary:        Read/Write data to and from a Hawkular metric server.
 
-License:        GPLv2
+License:        Apache License 2.0
 URL:            https://github.com/yaacov/%{name}
-Source0:        https://github.com/yaacov/%{name}/archive/%{name}-%{version}.tar.gz
+Source0:        https://github.com/yaacov/%{name}/archive/v%{version}.tar.gz
 
 BuildArch:      noarch
 BuildRequires:  python-devel
@@ -41,7 +41,7 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
-* Tue Mar 14 2017 yaacov <kobi.zamir@gmail.com> 0.16-2-1
+* Tue Mar 14 2017 yaacov <kobi.zamir@gmail.com> 0.16.3-1
 - bump version (kobi.zamir@gmail.com)
 - edit spec file (kobi.zamir@gmail.com)
 
