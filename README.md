@@ -31,6 +31,17 @@ The script is using the python [hawkular-client](https://github.com/hawkular/haw
 
 To install, run ``python setup.py install`` if you installed from source code, or ``pip install hawkular-client-cli`` if using pip.
 
+### Copr repository
+
+Packages can be downloaded using Fedora Copr:
+
+```bash
+dnf copr enable @Hawkular/python-hawkular-client 
+dnf copr enable yaacov/hawkular-cli 
+
+dnf install hawkular-client-cli
+```
+
 ## Usage
 
 The `-h` flag will print out a help text, that list the command line arguments.
