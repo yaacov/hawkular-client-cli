@@ -106,6 +106,9 @@ class CommandLine(object):
         parser.add_argument('--limit', dest='limit', type=int, nargs='?',
                             default=10,
                             help='limit for metrics reading')
+        parser.add_argument('-S', "--time", dest='data_time', type=valid_date,
+                            default=datetime.now(),
+                            help="override time value timestamp (default is now)")
         parser.add_argument('--auto-api', action='store_true',
                             help='check api version before query server')
         parser.add_argument('-V', '--verbose', action='store_true',
@@ -302,8 +305,9 @@ class CommandLine(object):
         """
         for pair in self.args.values:
             key, value = pair.split("=")
-            self.log('Push:', key, value)
-            self.client.push(self.metric_type, key, value)
+            timestamp = int(total_milisecond(self.args.data_time))
+            self.log('Push:', key, value, timestamp)
+            self.client.push(self.metric_type, key, value, timestamp)
 
     def _update_metric_tags(self):
         """ Update metric tags
