@@ -1,7 +1,7 @@
 %{!?python_sitelib: %global python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")}
 
 Name:           hawkular-client-cli
-Version:        0.16.4
+Version:        0.17.1
 Release:        1%{?dist}
 Summary:        Read/Write data to and from a Hawkular metric server.
 
