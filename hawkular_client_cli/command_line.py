@@ -18,7 +18,7 @@
 from __future__ import (absolute_import, division,
                         print_function, unicode_literals)
 
-_VERSION = '0.18.1'
+_VERSION = '0.18.2'
 _DESCRIPTION = 'Read/Write data to and from a Hawkular metric server.'
 
 import os
