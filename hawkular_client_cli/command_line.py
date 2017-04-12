@@ -18,7 +18,7 @@
 from __future__ import (absolute_import, division,
                         print_function, unicode_literals)
 
-_VERSION = '0.17.1'
+_VERSION = '0.18.0'
 _DESCRIPTION = 'Read/Write data to and from a Hawkular metric server.'
 
 import os
@@ -89,6 +89,8 @@ class CommandLine(object):
                             help='a list of keys [ when used with a list of tags, will update tags for this keys ]')
         parser.add_argument('-l', '--list', action='store_true',
                             help='list all registered keys, can be used with --tags argument for filtering')
+        parser.add_argument('-g', '--tenants', action='store_true',
+                            help='list all availabile tenants')
         parser.add_argument('-r', '--read', action='store_true',
                             help='read data for keys or tag list [requires the --keys or --tags arguments]')
         parser.add_argument('-m', '--metric', choices=['gauge', 'counter', 'string', 'availability'],
@@ -152,11 +154,11 @@ class CommandLine(object):
     def _get_client(self):
         """ Create a Hawkular metrics client
         """
-        url = self.args.url or self.config.get('hawkular').get('url') or os.environ.get('HAWKULAR_URL')
-        tenant = self.args.tenant or self.config.get('hawkular').get('tenant') or os.environ.get('HAWKULAR_TENANT')
-        token = self.args.token or self.config.get('hawkular').get('token') or os.environ.get('HAWKULAR_TOKEN')
-        username = self.args.username or self.config.get('hawkular').get('username') or os.environ.get('HAWKULAR_USERNAME')
-        password = self.args.password or self.config.get('hawkular').get('password') or os.environ.get('HAWKULAR_PASSWORD')
+        url = self.args.url or os.environ.get('HAWKULAR_URL') or self.config.get('hawkular').get('url')
+        tenant = self.args.tenant or os.environ.get('HAWKULAR_TENANT') or self.config.get('hawkular').get('tenant')
+        token = self.args.token or os.environ.get('HAWKULAR_TOKEN') or self.config.get('hawkular').get('token')
+        username = self.args.username or os.environ.get('HAWKULAR_USERNAME') or self.config.get('hawkular').get('username')
+        password = self.args.password or os.environ.get('HAWKULAR_PASSWORD') or self.config.get('hawkular').get('password')
         insecure = self.args.insecure or self.config.get('hawkular').get('insecure') or False
         auto_api = self.args.auto_api or self.config.get('hawkular').get('auto_api') or False
         context = ssl._create_unverified_context() if insecure else None
@@ -226,6 +228,14 @@ class CommandLine(object):
         for definition in definitions:
             print('key: ', definition.get('id'))
             print('tags:', definition.get('tags') or {})
+            print()
+
+    def _query_tenants(self):
+        """ Get a list of tenants
+        """
+        definitions = self.client.query_tenants()
+        for definition in definitions:
+            print('id: ', definition.get('id'))
             print()
 
     def _query_metric_stats_by_keys(self):
@@ -390,6 +400,15 @@ class CommandLine(object):
             self.log('List keys by tags:', self.args.tags)
             try:
                 self._query_metric_definitions()
+            except Exception as err:
+                print(err, '\n')
+                sys.exit(1)
+
+        # Do actions tenants
+        if self.args.tenants:
+            self.log('List teanats:')
+            try:
+                self._query_tenants()
             except Exception as err:
                 print(err, '\n')
                 sys.exit(1)
