@@ -18,7 +18,7 @@
 from __future__ import (absolute_import, division,
                         print_function, unicode_literals)
 
-_VERSION = '0.18.2'
+_VERSION = '0.18.3'
 _DESCRIPTION = 'Read/Write data to and from a Hawkular metric server.'
 
 import os
@@ -236,7 +236,6 @@ class CommandLine(object):
         definitions = self.client.query_tenants()
         for definition in definitions:
             print('id: ', definition.get('id'))
-            print()
 
     def _query_metric_stats_by_keys(self):
         """ get meric data
